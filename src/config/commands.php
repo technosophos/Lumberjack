@@ -179,7 +179,8 @@ Config::request('apachelog')
   ->doesCommand('apachelog')
     ->whichInvokes('ApacheErrorLogParser')
     ->withParam('file')
-      ->whoseValueIs('/Users/mbutcher/Code/ConsumerSearch/logs/error-web1.log')
+      ->from('arg:1')
+    //  ->whoseValueIs('/Users/mbutcher/Code/ConsumerSearch/logs/error-web1.log')
 ;
 
 Config::request('drupallog')

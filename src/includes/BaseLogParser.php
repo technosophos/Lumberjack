@@ -43,6 +43,29 @@ abstract class BaseLogParser extends BaseFortissimoCommand {
  
  /**
   * Parse a line and return an associative array of data.
+  *
+  * This function should parse a line from the desired logfile and return an associative array
+  * of data. The data will then be stored in the database in the corresponding format.
+  *
+  * It is a good idea to try to repeat the naming conventions of other loggers so that simple
+  * queries can be constructed.
+  *
+  * Here's an example return value from Apache error logs:
+  * @code
+  * $data = array(
+  *   'raw' => $buffer[0],
+  *   'date' => strtotime($buffer[1]),
+  *   'client' => $buffer[2],
+  *   'message' => empty($buffer[3]) ? $buffer[5]: $buffer[3],
+  *   'referer' => isset($buffer[4]) ? $buffer[4] : '',
+  *   'level' => BaseLogParser::LEVEL_ERROR,
+  * );
+  * @endcode
+  *
+  * @param string $line
+  *  A log line to parse
+  * @return array
+  *  An associative array of field names and values.
   */
  abstract function parseLine($line);
  
