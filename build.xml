@@ -1,0 +1,104 @@
+<?xml version="1.0"?>
+<project name="Lumberjack" 
+  description=""
+  basedir="." 
+  default="main"
+>
+<!--
+Fortissimo project build file.
+
+This file contains all of the definitions for building a Fortissimo-based 
+project using Phing. To view the list of supported commands, use the command:
+
+$ phing -l
+
+Copyright (c) 2009, Matt Butcher, some rights reserved.
+-->
+
+  <target name="info" description="Information on using the QueryPath Phing build.">
+    <echo>
+To build this project, run
+
+phing build
+
+To list all of the commands that you can perform on a Fortissimo project, run
+
+phing -l
+
+Creating a New Project
+======================
+If you want to create a new Fortissimo project, and you have the Fortissimo
+toolchain installed, simply run this command:
+
+fff MyProjectName
+    </echo>
+  </target>
+
+  <!--
+  =============================================================================
+  GLOBAL PROPERTIES
+  =============================================================================
+  -->
+  <property name="project" value="${phing.project.name}"/>
+  <property name="srcdir" value="${project.basedir}/src"/>
+  <property name="testdir" value="${project.basedir}/test"/>
+  <property name="builddir" value="${project.basedir}/bin/build"/>
+  <property name="docsdir" value="${project.basedir}/doc"/>
+  <property name="packagedir" value="${project.basedir}/dist"/>
+  <property name="appdir" value="{$srcdir}/includes"/>
+
+  <!--
+  =============================================================================
+  FORTISSIMO TASKS
+  =============================================================================
+  -->
+  <includepath classpath="${project.basedir}/lib"/>
+  <taskdef classname="task.FortissimoExplainTask" name="fortissimoexplain"/>
+  <taskdef classname="task.FortissimoRunRequestTask" name="fortissimorequest"/>
+
+  <!--
+  =============================================================================
+  FILE SETS
+  =============================================================================
+  -->
+
+  <!-- Files that must be included in the release -->
+  <fileset id="licensefiles" dir=".">
+    <include name="README"/>
+    <include name="INSTALL"/>
+  </fileset>
+
+  <!-- Files to be treated as source code -->
+  <fileset id="sourcecode" dir="${srcdir}">
+    <include name="**/*" />
+  </fileset>
+  
+  <!-- App-specific Files to be treated as source code -->
+  <fileset id="appcode" dir="$appdir">
+    <include name="**/*" />
+  </fileset>
+  
+  <!--
+  =============================================================================
+  COMMANDS (BUILD TARGETS)
+  =============================================================================
+  -->
+
+  <!-- Main Target -->
+  <target name="main" description="main target">
+      
+  </target>
+  
+  <target name="explain" description="Explain all of the requests.">
+    <fortissimoexplain/>
+  </target>
+  <target name="run" description="Run the default request">
+    <property name="o" value="default"/>
+    <fortissimorequest request="${o}"/>
+  </target>
+  <target name="lint" description="Check syntax of source.">
+    <phplint>
+      <fileset refid="sourcecode" />
+    </phplint>
+  </target>
+</project>
