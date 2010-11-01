@@ -179,7 +179,7 @@ Config::request('apachelog')
   ->doesCommand('apachelog')
     ->whichInvokes('ApacheErrorLogParser')
     ->withParam('file')
-      ->from('arg:1')
+      ->from('argv:2')
     //  ->whoseValueIs('/Users/mbutcher/Code/ConsumerSearch/logs/error-web1.log')
 ;
 
@@ -187,14 +187,16 @@ Config::request('drupallog')
   ->doesCommand('drupallog')
     ->whichInvokes('DrupalSyslogParser')
     ->withParam('file')
-      ->whoseValueIs('/Users/mbutcher/Code/ConsumerSearch/logs/drupal-nycsweb1.log')
+      ->from('argv:2')
+      //->whoseValueIs('/Users/mbutcher/Code/ConsumerSearch/logs/drupal-nycsweb1.log')
 ;
 
 Config::request('varnishncsalog')
   ->doesCommand('varnishlog')
     ->whichInvokes('VarnishNCSALogParser')
     ->withParam('file')
-      ->whoseValueIs('/Users/mbutcher/Code/ConsumerSearch/logs/nycscache1.log.0')
+      ->from('argv:2')
+      //->whoseValueIs('/Users/mbutcher/Code/ConsumerSearch/logs/nycscache1.log.0')
 ;
 
 /**

@@ -3,7 +3,7 @@
 class ApacheErrorLogParser extends BaseLogParser {
   
   // [Tue Oct 26 23:59:59 2010] [error] [client 10.12.21.30] ALERT - script tried to increase memory_limit to 205520896 bytes which is above the allowed value (attacker '10.12.21.30', file '/mnt/cs/www/www.consumersearch.com/sites/www.consumersearch.com/settings.php', line 319)
-  const APACHE_REGEX = '/^\[(.*)\] \[error\] \[client ([0-9\.]*)\] (?(?=.*, referer: )(.*), referer: (.*)|(.*))$/';
+  const APACHE_REGEX = '/^\[(.*)\] \[[a-z]+\] (?(?=\[client)\[client ([0-9\.]*)\] )(?(?=.*, referer: )(.*), referer: (.*)|(.*))$/';
   
   public function expects() {
     return $this
@@ -21,12 +21,19 @@ class ApacheErrorLogParser extends BaseLogParser {
   }
   
   public function parseLine($line) {
-    print $line;
     $buffer = array();
     $res = preg_match(self::APACHE_REGEX, $line, $buffer);
     
+    if (empty($buffer[0])) {
+      return array(
+        'type' => 'apache error',
+        'raw' => $line,
+      );
+    }
+    
     //return $buffer;
     $data = array(
+      'type' => 'apache error',
       'raw' => $buffer[0],
       'date' => strtotime($buffer[1]),
       'client' => $buffer[2],

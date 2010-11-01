@@ -25,20 +25,26 @@ abstract class BaseLogParser extends BaseFortissimoCommand {
  public function doCommand() {
    $this->ds = $this->context->ds($this->param('datasource'));
    //$this->collection = 'logs'
+   $logfile = $this->param('file');
    
-   $file = fopen($this->param('file'), 'r');
+   printf('Reading logfile %s.' . PHP_EOL, $logfile);
+      
+   $file = fopen($logfile, 'r');
    $i = 0;
-   while (($line = fgets($file)) && $i++ < 100) {
+   while ($line = fgets($file)) {
+     ++$i;
      //print $i++ . ' ' . $line;
      $data = $this->parseLine($line);
      
      // Add this to make it easier to identify the lines later.
-     $data['filename'] = $this->param('file');
+     $data['filename'] = $logfile;
      
      // XXX: Should we buffer a few hundred items and then save at once?
      $this->store($data);
    }
    fclose($file);
+   
+   printf('Loaded %d lines.' . PHP_EOL, $i);
  }
  
  /**
@@ -70,7 +76,7 @@ abstract class BaseLogParser extends BaseFortissimoCommand {
  abstract function parseLine($line);
  
  public function store($data) {
-   //$this->context->datasource('db')->get()->logs->save($data);
-   print_r($data);
+   $this->context->datasource('db')->get()->logs->save($data);
+   //print_r($data);
  }
 }

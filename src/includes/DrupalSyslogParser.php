@@ -18,6 +18,13 @@ class DrupalSyslogParser extends BaseLogParser {
     $buffer = array();
     $res = preg_match(self::PARSER_REGEX, $line, $buffer);
     
+    if (empty($buffer[0])) {
+      return array(
+        'type' => 'drupal',
+        'raw' => $line,
+      );
+    }
+    
     /*
      * Drupal log has a pipe-delimited list with these eight fields:
      * 0: site
@@ -30,10 +37,22 @@ class DrupalSyslogParser extends BaseLogParser {
      * 7: Link
      * 8: Error message
      */    
-    $drupal = explode('|', $buffer[3]);
+    $drupal = explode('|', $buffer[3], 9);
+    $foo = count($drupal);
+    if ($foo < 9) {
+      return array(
+        'type' => 'drupal',
+        'raw' => $buffer[0],
+        'date' => strtotime($buffer[1]),
+        'server' => $buffer[2],
+        'message' => $buffer[3],
+        'level' => BaseLogParser::LEVEL_ERROR,
+      );
+    }
     //print_r($drupal);
     
     $data = array(
+      'type' => 'drupal',
       'raw' => $buffer[0],
       //'date' => strtotime($buffer[1]),
       'date' => $drupal[1],
