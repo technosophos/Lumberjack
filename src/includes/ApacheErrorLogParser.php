@@ -32,6 +32,7 @@ class ApacheErrorLogParser extends BaseLogParser {
       'client' => $buffer[2],
       'message' => empty($buffer[3]) ? $buffer[5]: $buffer[3],
       'referer' => isset($buffer[4]) ? $buffer[4] : '',
+      'level' => BaseLogParser::LEVEL_ERROR,
     );
     return $data;
   }
