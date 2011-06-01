@@ -18,25 +18,42 @@ class FortissimoExplainTask extends Task {
   
   public function init() {}
   public function main() {
-    // $conf = qp('src/config/commands.php');
-    // $requests = $conf->branch('request');
-    // 
-    // // Turn explain on.
-    // foreach ($requests as $req) $req->attr('explain', 'true');
     
-    include 'src/config/commands.php';
-    $config = Config::getConfigiration();
-    foreach ($config[Config::REQUESTS] as $request) {
-      $request['#explaining'] = TRUE;
+    // Add 'src/' to the include path.
+    $path = './src' . PATH_SEPARATOR . get_include_path();
+    set_include_path($path);
+    
+    // Load the configuration.
+    include 'config/commands.php';
+    $config = Config::getConfiguration();
+    
+    foreach ($config[Config::REQUESTS] as $reqName => $payload) {
+      $config[Config::REQUESTS][$reqName]['#explaining'] = TRUE;
     }
-    Config::configuration($config);
     
+    // We might have to reset relative paths.
+    $pathCount = count($config[Config::PATHS]);
+    for($i = 0; $i < $pathCount; ++$i) {
+      
+      // We're looking for relative paths that exist in src/.
+      if (strpos($config[Config::PATHS][$i], '/') !== 0 
+          && is_dir('src/' . $config[Config::PATHS][$i])) {
+        // Add a prefix.
+        $config[Config::PATHS][$i] = 'src/' . $config[Config::PATHS][$i];
+      }
+      
+    }
     
+    Config::initialize($config);
+    
+    // Now we do it again, this time to invoke explain.
+    $config = Config::getConfiguration();
     $ff = new Fortissimo();
     
     // Invoke explain on each item.
-    foreach ($requests as $req) {
-      $ff->handleRequest($req->attr('name'));
+    foreach ($config[Config::REQUESTS] as $name => $junk) {
+      //print "Doing $name" . PHP_EOL;
+      $ff->handleRequest($name);
     }
   }
 }

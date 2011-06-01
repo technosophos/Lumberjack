@@ -3,8 +3,8 @@
  * A basic datasource that wraps a MongoDB instance.
  *
  * This datasource wraps a MongoDB database instance.
- * @package Fortissimo
- * @subpackage Command
+ *
+ * @ingroup Fortissimo
  */
  
 /**
@@ -17,6 +17,8 @@
  * This uses two parameters from the configuration:
  * - server: The server URL (e.g. 'mongodb://localhost:27017')
  * - defaultDB: The database (e.g. 'myDB')
+ *
+ * @ingroup Fortissimo
  */
 class FortissimoMongoDatasource extends FortissimoDatasource {
   
@@ -39,7 +41,6 @@ class FortissimoMongoDatasource extends FortissimoDatasource {
    * - defaultDB: The default database to use (required)
    */
   public function init() {
-    
     if (!isset($this->params['defaultDB'])) {
       throw new FortissimoInterruptException("'defaultDB' is a required parameter.");
     }

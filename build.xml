@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <project name="Lumberjack" 
   description=""
-  basedir="." 
   default="main"
 >
 <!--
@@ -47,14 +46,7 @@ fff MyProjectName
   <property name="packagedir" value="${project.basedir}/dist"/>
   <property name="appdir" value="{$srcdir}/includes"/>
 
-  <!--
-  =============================================================================
-  FORTISSIMO TASKS
-  =============================================================================
-  -->
-  <includepath classpath="${project.basedir}/lib"/>
-  <taskdef classname="task.FortissimoExplainTask" name="fortissimoexplain"/>
-  <taskdef classname="task.FortissimoRunRequestTask" name="fortissimorequest"/>
+
 
   <!--
   =============================================================================
@@ -74,9 +66,25 @@ fff MyProjectName
   </fileset>
   
   <!-- App-specific Files to be treated as source code -->
-  <fileset id="appcode" dir="$appdir">
+  <fileset id="appcode" dir="${appdir}">
     <include name="**/*" />
   </fileset>
+  
+  <!-- Unit tests -->
+  <fileset id="unittests" dir="${testdir}">
+    <include name="**/*" />
+  </fileset>
+  
+  <!--
+  =============================================================================
+  FORTISSIMO TASKS
+  =============================================================================
+  -->
+  <target name="registerTasks">
+    <includepath classpath="${project.basedir}/lib"/>
+    <taskdef classname="task.FortissimoExplainTask" name="fortissimoexplain"/>
+    <taskdef classname="task.FortissimoRunRequestTask" name="fortissimorequest"/>
+  </target>
   
   <!--
   =============================================================================
@@ -89,10 +97,10 @@ fff MyProjectName
       
   </target>
   
-  <target name="explain" description="Explain all of the requests.">
+  <target name="explain" description="Explain all of the requests." depends="registerTasks">
     <fortissimoexplain/>
   </target>
-  <target name="run" description="Run the default request">
+  <target name="run" description="Run the default request" depends="registerTasks">
     <property name="o" value="default"/>
     <fortissimorequest request="${o}"/>
   </target>
@@ -100,5 +108,82 @@ fff MyProjectName
     <phplint>
       <fileset refid="sourcecode" />
     </phplint>
+  </target>
+  
+  <!-- TARGET
+  
+  Run any necessary preliminaries before executing tests.
+  -->
+  <target name="pretest" description="tasks done before any unit testing.">
+    <mkdir dir="test/reports"/>
+    <mkdir dir="test/reports/html"/>
+  </target>
+  
+  <!-- TARGET
+  Run a full test and format an HTML report.
+  
+  This differs from tmtest in that the output for this report is more robust, designed for
+  detailed viewing, not viewing quickly in a pop-up window.
+  -->
+  <target name="test" depends="lint,pretest" description="Run full tests">
+    <mkdir dir="${project.basedir}/test/reports/html"/>
+    <mkdir dir="${project.basedir}/test/db"/>
+    <phpunit>
+      <formatter todir="${project.basedir}/test/reports" type="xml"/>
+      <batchtest>
+        <fileset dir="${project.basedir}/test/Tests">
+          <include name="**/*Test.php"/>
+        </fileset>
+      </batchtest>
+    </phpunit>
+    <phpunitreport 
+      infile="${project.basedir}/test/reports/testsuites.xml" 
+      format="frames" 
+      todir="${project.basedir}/test/reports/html" 
+      />
+  </target>
+  
+  <!-- TARGET 
+  Run a coverage report.
+  
+  Run a report to determine to what extent your code has been covered by the unit tests.
+  -->
+  <target name="coverage" depends="lint" description="Run a coverage analysis.">
+    <coverage-setup database="${project.basedir}/test/db/coverage.db">
+      <fileset refid="sourcecode"/>
+    </coverage-setup>
+    <phpunit codecoverage="true" haltonfailure="true">
+      <formatter type="plain" todir="${project.basedir}/test/reports" outfile="coverage.xml"/>
+      <batchtest>
+        <fileset dir="${project.basedir}/test/Tests">
+          <include name="**/*Test.php"/>
+        </fileset>
+      </batchtest>
+    </phpunit>
+    <coverage-report outfile="${project.basedir}/test/reports/coverage.xml">
+      <report todir="${project.basedir}/test/coverage"/>
+    </coverage-report>
+  </target>
+
+  
+  <!-- TARGET
+  
+  Run unit tests with HTML output optimized for display inside of TextMate.
+  
+  If you have Phing-TMBundle installed (http://github.com/technosophos/phing-tmbundle) then
+  you can press CMD-SHIFT-I to run these tests.
+  -->
+  <target name="tmtest" description="Run test, optimized for TextMate output." depends="pretest">
+    <phpunit>
+      <formatter todir="${project.basedir}/test/reports" type="xml" usefile="yes"/>
+      <batchtest>
+        <fileset refid="unittests"/>
+      </batchtest>
+    </phpunit>
+     <phpunitreport 
+        infile="${project.basedir}/test/reports/testsuites.xml" 
+        format="noframes" 
+        todir="${project.basedir}/test/reports/html" 
+        />
   </target>
 </project>

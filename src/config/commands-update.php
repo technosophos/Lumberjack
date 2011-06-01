@@ -2,7 +2,7 @@
 /** @page commands.php
  * The commands.php file is the main configuration file for Fortissimo.
  *
- * There are (at least) six different facilities you can configure in this file:
+ * There are (at least) seven different facilities you can configure in this file:
  *
  * - requests: This is how you instruct Fortissimo on how to handle inbound requests. Essentially,
  *   you map a request to a chain of commands. The default request is 'default'. For more on 
@@ -22,10 +22,37 @@
  *   is more advanced, and is generally only needed on high-traffic apps.
  * - include paths: Fortissimo uses a PHP autoloader to find and include classes. You can tell
  *   Fortissimo what paths to use when seeking for classes.
+ * - request mapper: Each Fortissimo instance can have a single request mapper. This is a 
+ *   class that handles matching inbound URIs (or strings) onto a request. Fortissimo uses
+ *   its own FortissimoRequestMapper by default. You can replace it using 
+ *   Config::useRequestMapper().
+ *
+ *
+ *
+ * Requests are "containers" that describe a single process from beginning to end. A request is
+ * a chain of commands. Each command is executed in sequence, with each command having access to
+ * the output of the last command.
+ *
+ * There are a few requests that have special meaning to Fortissimo:
+ *
+ * - default: This is the request that will be executed when no request is explicitly issued.  Think
+ *   of it as Fortissimo's equivalent to request a base URL. 'default' is equivalent to 'index.html'
+ *   in that analogy.
+ * - 404: If a request named 404 exists, it will be used whenever a 404 error is encountered (e.g.
+ *   when no request is found to match the incoming URI/string.) Your request mapper, should you use
+ *   one, can redirect the 404 name to a different request name, too.
+ *
+ * Configuration Directives:
+ *  - @subpage include_path_config
+ *  - @subpage datasource_config
+ *  - @subpage group_config
+ *  - @subpage request_config
+ *  - @subpage logger_config
+ *  - @subpage cache_config
  */
 
 /**
- * @section include_path_config Include Paths
+ * @page include_path_config Include Paths
  *
  * To declare a new include path, you will want to use code like this:
  *
@@ -38,10 +65,10 @@
  * By default, Fortissimo uses a flat namespace (no deeply nested directories) because Fortissimo 
  * itself is a thin framework.
  */
-// Config::includePath('includes/MyClasses');
+Config::includePath('core/Fortissimo/Theme'); // Include the Theme classes, which are optional.
 
 /**
- * @section datasource_config Datasources
+ * @page datasource_config Datasources
  * Fortissimo provides a very thin database abstraction layer.
  *
  * To use it with MongoDB, simply customize the setup below. To use another
@@ -70,7 +97,7 @@ Config::datasource('db') // Name of datasource
 
 
 /**
- * @section group_config Groups
+ * @page group_config Groups
  * A group is a grouping of commands that cannot be executed as a request.
  *
  * While they are not directly executed (ever), they can be included into a request. See the 
@@ -99,11 +126,29 @@ Config::group('bootstrap')
 ;
 
 /**
- * @section request_config Requests
+ * @page request_config Requests
  *
  * This part of the configuration file is used for mapping an inbound request to a 
  * chain of commands. Fortissimo will begin with the first command and process commands
  * one at a time until the chain has completed (or some error condition has occurred.)
+ *
+ * Requests are "containers" that describe a single process from beginning to end. A request is
+ * a chain of commands. Each command is executed in sequence, with each command having access to
+ * the output of the last command.
+ *
+ * There are a few requests that have special meaning to Fortissimo:
+ *
+ * - default: This is the request that will be executed when no request is explicitly issued.  Think
+ *   of it as Fortissimo's equivalent to request a base URL. 'default' is equivalent to 'index.html'
+ *   in that analogy.
+ * - 404: If a request named 404 exists, it will be used whenever a 404 error is encountered (e.g.
+ *   when no request is found to match the incoming URI/string.) Your request mapper, should you use
+ *   one, can redirect the 404 name to a different request name, too.
+ * - @request: A request that begins with the at-sign (@) is considered INTERNAL. That means that
+ *   Fortissimo will refuse to answer this request if it is called directly. An INTERNAL request
+ *   can only be executed by another Fortissimo request or when Fortissimo::handleRequest() is
+ *   specifically told to $allowInternalRequests. The `fort` commandline client will, for example,
+ *   set this flag so that it can execute internal requests.
  *
  * @code
  * <?php
@@ -137,6 +182,7 @@ Config::group('bootstrap')
  *     ->whichInvokes('FortissimoEcho')
  *     ->from('context:tpl')
  * ;
+ * ?>
  * @endcode
  *
  * A request can have two things in its chain: commands and groups.
@@ -161,7 +207,7 @@ Config::request('default')
     ->withParam('templateCache')
       ->whoseValueIs('./cache')
     ->withParam('disableCache')
-      ->whoseValueIs(FALSE)
+      ->whoseValueIs(TRUE) // This should be FALSE on production.
     // ->withParam('debug')->whoseValueIs(FALSE)
     // ->withParam('trimBlocks')->whoseValueIs(TRUE)
     // ->withParam('auto_reload')->whoseValueIs(FALSE)
@@ -169,13 +215,13 @@ Config::request('default')
   // Send the rendered welcome page to the browser.
   ->doesCommand('echo')
     ->whichInvokes('FortissimoEcho')
-    ->usesParam('text')
+    ->withParam('text')
       ->from('context:tpl')
 ;
 
 /**
- * @section logger_config Loggers
- * 
+ * @page logger_config Loggers
+ *
  * You can configure Fortissimo to log to one or more logging backends.
  *
  * @code
@@ -191,12 +237,49 @@ Config::request('default')
  * @code
  * Config::logger('fail')
  *   ->whichInvokes('ForitissimoArrayInjectionLogger')
+ *   // Use this only if you want to restrict what is logged by this logger:
+ *   ->withParam('categories')
+ *     ->whoseValueIs('Fatal Error,Recoverable Error')
  * ;
  * @endcode
  *
  * New loggers can be created very easily. See the FortissimoOutputInjectionLogger code for an 
  * example.
+ *
+ * Loggers that ship with Fortissimo:
+ *  - FortissimoOutputInjectionLogger (aka FOIL)
+ *  - FortissimoArrayInjectionLogger (aka FAIL)
+ *  - SimpleOutputInjectionLogger (aka SOIL)
+ *  - SimpleArrayInjectionLogger (aka SAIL)
+ *  - FortissimoSyslogLogger (aka... Fizzle?)
  */
 Config::logger('foil')
   ->whichInvokes('FortissimoOutputInjectionLogger')
 ;
+
+/**
+ * @page cache_config Caches
+ *
+ * Caching support is built into Fortissimo.
+ *
+ * Fortissimo has built-in support for multiple caching backends. For example, applications could
+ * strategically cache some data in memcache and some in APC. Fortissimo includes a simple 
+ * implementation of a Memcached caching layer (FortissimoMemcacheCache). 
+ * @code
+ * <?php
+ * Config::cache('memcache')
+ *   ->whichInvokes('FortissimoMemcacheCache')
+ *   ->withParam('servers')
+ *     ->whoseValueIs(array('example.com:11211', 'example.com:11212'))
+ *   ->withParam('persistent')
+ *     ->whoseValueIs(FALSE)
+ *   ->withParam('compress')
+ *     ->whoseValueIs(FALSE)
+ * ;
+ * ?>
+ * @endcode
+ *
+ * If you want commands to cache (as opposed to just entire requests), your classes will need
+ * to implement Cacheable and extend BaseFortissimoCommand (or you can handle caching yourself
+ * in FortissimoCommand::execute()).
+ */

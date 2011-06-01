@@ -2,7 +2,7 @@
 class DrupalSyslogParser extends BaseLogParser {
   
   // Oct 26 00:00:13 nycsweb1 drupal: http://www.consumersearch.com|1288051213|cs_fullreport|10.12.21.68|http://www.consumersearch.com/auto-gps/garmin-nuvi-205w|http://www.consumersearch.com/auto-gps|0||no ASIN B001ELJERE in function theme_product_info_bubble_aflyout()
-  const PARSER_REGEX = '/^([a-zA-Z]{3} [0-9]{2} [0-9:]*) ([a-zA-Z0-9]*) drupal:(.*)$/';
+  const PARSER_REGEX = '/^([a-zA-Z]{3} [ 0-9]{2} [0-9:]*) ([a-zA-Z0-9]*) drupal:(.*)$/';
   
   public function expects() {
     return $this
@@ -55,7 +55,7 @@ class DrupalSyslogParser extends BaseLogParser {
       'type' => 'drupal',
       'raw' => $buffer[0],
       //'date' => strtotime($buffer[1]),
-      'date' => $drupal[1],
+      'date' => (int)$drupal[1],
       'server' => $buffer[2],
       'client' => $drupal[3],
       //'message' => $buffer[3],

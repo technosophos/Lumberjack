@@ -175,6 +175,24 @@ Config::request('default')
   
 ;
 
+Config::request('recent')
+  ->doesCommand('recent_entries')
+    ->whichInvokes('RecentEntriesQuery')
+    ->withParam('filter')->whoseValueIs(array('level' => 0))
+  ->doesCommand('print')
+    ->whichInvokes('PrintRawLog')
+    ->withParam('cursor')->from('cxt:recent_entries')
+;
+
+Config::request('recent-drupal')
+  ->doesCommand('recent_entries')
+    ->whichInvokes('RecentEntriesQuery')
+    ->withParam('filter')->whoseValueIs(array('type' => 'drupal'))
+  ->doesCommand('print')
+    ->whichInvokes('PrintDrupalLog')
+    ->withParam('cursor')->from('cxt:recent_entries')
+;
+
 Config::request('apachelog')
   ->doesCommand('apachelog')
     ->whichInvokes('ApacheErrorLogParser')
