@@ -35,7 +35,7 @@ class ApacheErrorLogParser extends BaseLogParser {
     $data = array(
       'type' => 'apache error',
       'raw' => $buffer[0],
-      'date' => strtotime($buffer[1]),
+      'date' => strtotime($buffer[1] . ' UTC'),
       'client' => $buffer[2],
       'message' => empty($buffer[3]) ? $buffer[5]: $buffer[3],
       'referer' => isset($buffer[4]) ? $buffer[4] : '',

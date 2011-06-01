@@ -10,9 +10,13 @@ abstract class StandardLogQuery extends BaseFortissimoCommand {
   
   public function doCommand() {
     $db = $this->context->ds('db')->get();
-    $collection = $db->logs;
+    $collection = $db->selectCollection($this->collectionName());
     
     return $this->query($collection);
+  }
+  
+  public function collectionName() {
+    return 'logs';
   }
   
   /**

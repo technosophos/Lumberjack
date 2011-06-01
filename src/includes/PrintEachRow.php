@@ -50,7 +50,7 @@ class PrintEachRow extends BaseFortissimoCommand {
     $values = array();
     
     foreach ($this->format_fields as $fname) {
-      $values[] = isset($data[$fname]) ? $fname : '';
+      $values[] = isset($data[$fname]) ? $data[$fname] : '';
     }
     
     return $values;

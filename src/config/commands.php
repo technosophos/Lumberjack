@@ -197,11 +197,47 @@ Config::request('drupal-summary')
   ->doesCommand('facilities_report')
     ->whichInvokes('DrupalFacilitiesReport')
     ->withParam('since')->whoseValueIs('May 30, 2011')
+  /*
   ->doesCommand('dump')
     ->whichInvokes('DumpMongoCollection')
     ->withParam('collection')->from('cxt:facilities_report')
+  */
+  ->doesCommand('query')
+    ->whichInvokes('SimpleLogQuery')
+    ->withParam('collection')->from('cxt:facilities_report')
+    ->withParam('filter')->whoseValueIs(array()) // Match all records.
+    ->withParam('sort')->whoseValueIs(array('value' => -1))
+  ->doesCommand('print')
+    ->whichInvokes('PrintEachRow')
+    ->withParam('iterable')->from('cxt:query')
+    ->withParam('format')->whoseValueIs("%s: %s\n")
+    ->withParam('fields')->whoseValueIs(array('_id', 'value'))
 ;
 
+Config::request('date2time')
+  ->doesCommand('d2t')->whichInvokes('ParseDate')->withParam('date')->from('argv:2')
+  ->doesCommand('print')->whichInvokes('FortissimoEcho')->withParam('text')->from('cxt:d2t')
+  ->doesCommand('print2')->whichInvokes('FortissimoEcho')->withParam('text')->whoseValueIs(PHP_EOL)
+;
+
+Config::request('query-log')
+  ->doesCommand('filter')
+    ->whichInvokes('ParseJSON')
+    ->withParam('json')->from('argv:2')
+  ->doesCommand('query')
+    ->whichInvokes('SimpleLogQuery')
+    ->withParam('filter')->from('cxt:filter')
+    ->withParam('sort')->whoseValueIs(array('date' => 1))
+    ->withParam('fields')->whoseValueIs(array('raw'))
+  ->doesCommand('print')
+    ->whichInvokes('PrintRawLog')
+    ->withParam('cursor')->from('cxt:query')
+  /*->doesCommand('dump')
+    ->whichInvokes('DumpMongoCollection')
+    ->withParam('collection')->whoseValueIs('logs')
+    */
+
+;
 
 Config::request('apachelog')
   ->doesCommand('apachelog')
