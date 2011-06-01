@@ -184,7 +184,7 @@ Config::request('recent')
     ->withParam('cursor')->from('cxt:recent_entries')
 ;
 
-Config::request('recent-drupal')
+Config::request('drupal-recent')
   ->doesCommand('recent_entries')
     ->whichInvokes('RecentEntriesQuery')
     ->withParam('filter')->whoseValueIs(array('type' => 'drupal'))
@@ -192,6 +192,16 @@ Config::request('recent-drupal')
     ->whichInvokes('PrintDrupalLog')
     ->withParam('cursor')->from('cxt:recent_entries')
 ;
+
+Config::request('drupal-summary')
+  ->doesCommand('facilities_report')
+    ->whichInvokes('DrupalFacilitiesReport')
+    ->withParam('since')->whoseValueIs('May 30, 2011')
+  ->doesCommand('dump')
+    ->whichInvokes('DumpMongoCollection')
+    ->withParam('collection')->from('cxt:facilities_report')
+;
+
 
 Config::request('apachelog')
   ->doesCommand('apachelog')
