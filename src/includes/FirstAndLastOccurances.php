@@ -15,7 +15,7 @@ class FirstAndLastOccurances extends MapReduceLogQuery {
 
   public function expects() {
     return $this
-      ->description('Find the first and last occurences of a given filter.')
+      ->description('Find the first and last occurrences of a given filter.')
       ->usesParam('filter', 'The filter to search for.')
       ->usesParam('destination', 'The name of the collection')
       ->andReturns('The name of the holding collection.')
