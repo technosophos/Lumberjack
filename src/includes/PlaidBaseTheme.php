@@ -12,10 +12,9 @@
 class PlaidBaseTheme extends BaseThemePackage {
   
   public function templates() {
-    print "registering..." . PHP_EOL;
     return array(
       'head' => 'top.php',
-      'body' => 'bottom.php',
+      'foot' => 'bottom.php',
       'filter-form' => 'filter-form.php',
     );
   }

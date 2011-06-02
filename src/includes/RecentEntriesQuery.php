@@ -23,7 +23,6 @@ class RecentEntriesQuery extends StandardLogQuery {
     //$collection->find($query)->min(array('date' => $yesterday));
     $query['date'] = array('$gte' => $yesterday);
     
-    print_r($query);
     return $collection->find($query)->sort(array('date' => 1));
   }
 }
