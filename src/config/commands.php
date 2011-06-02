@@ -40,6 +40,9 @@
  */
 // Config::includePath('includes/MyClasses');
 
+Config::includePath('core/Fortissimo/Theme');
+//Config::includePath('theme/plaid');
+
 /**
  * @section datasource_config Datasources
  * Fortissimo provides a very thin database abstraction layer.
@@ -93,9 +96,16 @@ Config::datasource('db') // Name of datasource
  * The above defines a group with a chain of two commands. The first has a single parameter. The 
  * second has no parameters.
  */
-Config::group('bootstrap')
-  //->doesCommand('some_command')->whichInvokes('SomeCommandClass')
-  //->doesCommand('some_other_command')->whichInvokes('SomeOtherCommandClass')
+Config::group('web_boot')
+  ->doesCommand('initTheme')
+    ->whichInvokes('InitializeTheme')
+    ->withParam('path')->whoseValueIs('theme/plaid')
+    ->withParam('register')->whoseValueIs(array(
+      'PlaidBaseTheme',
+    ))
+    ->withParam('settings')->whoseValueIs(array(
+      'site_title' => 'Lumberjack',
+    ));
 ;
 
 /**
@@ -144,6 +154,7 @@ Config::group('bootstrap')
 Config::request('default')
   // Bootstrap
   //->usesGroup('bootstrap')
+  ->usesGroup('web_boot')
   // Initialize the context with some values.
   ->doesCommand('initContext')
     ->whichInvokes('FortissimoAddToContext')
@@ -152,27 +163,27 @@ Config::request('default')
     ->withParam('welcome')
       ->whoseValueIs('Fortissimo has been successfully installed.')
   
-  // Use the template engine to generate a welcome page.
-  ->doesCommand('tpl')
-    ->whichInvokes('FortissimoTemplate')
-    ->withParam('template')
-      ->whoseValueIs('example.twig')
-    ->withParam('templateDir')
-      ->whoseValueIs('theme/vanilla')
-    ->withParam('templateCache')
-      ->whoseValueIs('./cache')
-    ->withParam('disableCache')
-      ->whoseValueIs(FALSE)
-    // ->withParam('debug')->whoseValueIs(FALSE)
-    // ->withParam('trimBlocks')->whoseValueIs(TRUE)
-    // ->withParam('auto_reload')->whoseValueIs(FALSE)
-    
-  // Send the rendered welcome page to the browser.
-  ->doesCommand('echo')
+  // Header: Send it early, because data processing may take a while.
+  ->doesCommand('createHeader')
+    ->whichInvokes('RenderTheme')
+    ->withParam('theme')->whoseValueIs('head')
+    ->withParam('variables')->whoseValueIs(array('title' => 'Lumberjack'))
+  ->doesCommand('echoHeader')
     ->whichInvokes('FortissimoEcho')
     ->withParam('text')
-      ->from('context:tpl')
+      ->from('context:createHeader')
   
+  ->doesCommand('createfooter')
+    ->whichInvokes('RenderTheme')
+    ->withParam('theme')->whoseValueIs('foot')
+    ->withParam('variables')->whoseValueIs(array())
+  ->doesCommand('echoFooter')
+    ->whichInvokes('FortissimoEcho')
+    ->withParam('text')
+      ->from('context:createFooter')
+  // ->doesCommand('dump')
+  //   ->whichInvokes('FortissimoContextDump')
+    //->withParam('collection')->from('cxt:facilities_report')
 ;
 
 Config::request('recent')
