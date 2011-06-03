@@ -21,7 +21,10 @@ class PlaidBaseTheme extends BaseThemePackage {
   
   public function functions() {
     return array(
-      //'target' => callback,
+      'log_table_row' => function ($vars) {
+        $date = empty($vars['date']) ? 'unknown' : date('d/m/y G:i:s', $vars['date']);
+        return sprintf('<tr><td><span class="smalldate">%s</span></td><td>%s</td><td>%s</td><td>%s</td>', $date, $vars['type'], $vars['message'], $vars['facility']);
+      },
     );
   }
   

@@ -20,6 +20,10 @@
 	<style>
 	@import "media/css/demo_table_jui.css";
 	@import "media/css/ui-darkness/jquery-ui-1.8.13.custom.css";
+	
+	.smalldate {
+	  font-size: .7em;
+	}
 	</style>
 </head>
 <body>

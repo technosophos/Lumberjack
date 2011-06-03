@@ -18,7 +18,7 @@ class PrintEachRow extends BaseFortissimoCommand {
       ->description('Iterate a collection, format and print each row.')
       ->usesParam('iterable', 'The Iterable object or array')
       ->whichIsRequired()
-      ->usesParam('format', 'The format string to run. See the sprintf() manual page.')
+      ->usesParam('formatter', 'The theme formatter for this. This will be rendered using the Theme system')
       ->whichIsRequired()
       ->usesParam('fields', 'The fields in each record that should be printed. These can be referenced by index (starting at 1) or placed in order. It is assumed that each item in the iterator will have the fields listed here.')
       ->whichHasDefault(array())
@@ -34,14 +34,15 @@ class PrintEachRow extends BaseFortissimoCommand {
   public function doCommand() {
     
     $rows = $this->param('iterable');
-    $format = $this->param('format');
+    $format = $this->param('formatter');
     $this->format_fields = $this->param('fields');
     //$sep = $this->param('separator', PHP_EOL);
     
     $buffer = array();
     foreach ($rows as $row) {
       $values = $this->prepareFields($row);
-      vprintf($format, $values);
+      //vprintf($format, $values);
+      print Theme::render($format, $values);
     }
 
   }
@@ -50,7 +51,7 @@ class PrintEachRow extends BaseFortissimoCommand {
     $values = array();
     
     foreach ($this->format_fields as $fname) {
-      $values[] = isset($data[$fname]) ? $data[$fname] : '';
+      $values[$fname] = isset($data[$fname]) ? $data[$fname] : '';
     }
     
     return $values;
